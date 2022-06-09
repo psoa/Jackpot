@@ -1,7 +1,22 @@
+import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const JackPotApp());
+
+  Future<CaixaMegaSena> fetchPost() async {
+    final http.Response response =  await http.get("https://servicebus2.caixa.gov.br/portaldeloterias/api/megasena");
+
+    if (response.statusCode == 200) {
+      // If the call to the server was successful, parse the JSON.
+      return CaixaMegaSena.fromJson(json.decode(response.body));
+    } else {
+      // If that call was not successful, throw an error.
+      throw Exception('Failed to load result');
+    }
+  }
 }
 
 class JackPotApp extends StatelessWidget {
@@ -10,11 +25,11 @@ class JackPotApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Jack´s Spot',
+      title: 'Jack´s pot',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: const HomePage(title: 'Jack´s Spot'),
+      home: const HomePage(title: 'Jack´s pot'),
     );
   }
 }
@@ -63,4 +78,15 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
+}
+
+class CaixaMegaSena {
+  List number = List .filled(6, 0);
+  var people;
+
+  CaixaMegaSena({required this.number,this.people});
+
+  factory CaixaMegaSena.fromJson(Map<String, dynamic> json) => CaixaMegaSena(
+    number: json['listaDezenas'],
+  );
 }
